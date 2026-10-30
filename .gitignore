@@ -10,3 +10,7 @@ docs/devpost-draft.png
 demo-film/.hyperframes/
 demo-film/output/
 demo-film/out.mp4
+.hyperframes/
+
+demo-film/.thumbnails/
+demo-film/.waveform-cache/

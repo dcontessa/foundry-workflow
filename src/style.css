@@ -738,3 +738,4 @@ html {
     transition: none !important;
   }
 }
+dialog.modal{border:0;margin:auto;color:#242722}dialog.modal::backdrop{background:#24272270}

@@ -1,0 +1,1 @@
+Open the duplicate test. The contract expects one record and a review warning. The baseline accepts two records. This evidence comes from the same engine that powers the form.

@@ -1,0 +1,1 @@
+Foundry proposes bounded rule changes. A person reviews the changes before applying them. The repair cannot rewrite the tests or regress an already passing scenario.

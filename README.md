@@ -6,6 +6,10 @@ Foundry turns a messy training-enquiry process into a working workflow and tests
 
 ![Foundry workbench](docs/foundry-desktop.png)
 
+[Try the public sample](https://dcontessa.github.io/foundry-workflow/) · [Verification notes](docs/QA.md)
+
+The public preview runs prepared sample configurations. Live NVIDIA inference remains pending. All 14 automated checks pass, including local fixture-backed HTTP integration checks.
+
 ## Run locally
 
 Requires Node.js 22.18+ (tested on Node 26) and npm.

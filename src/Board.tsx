@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Search, X } from "lucide-react";
 import {
   createEnquiry,
@@ -28,6 +28,15 @@ export function Board({
       owner: "",
     }),
     [message, setMessage] = useState("");
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (adding) dialogRef.current?.showModal();
+  }, [adding]);
+  function closeForm() {
+    dialogRef.current?.close();
+    setAdding(false);
+    setMessage('');
+  }
   const visible = visibleEnquiries(records, rules).filter(
     (r) =>
       `${r.name} ${r.email} ${r.course}`
@@ -186,10 +195,9 @@ export function Board({
         </p>
       )}
       {adding && (
-        <div className="modal-backdrop">
-          <section
-            role="dialog"
-            aria-modal="true"
+          <dialog
+            ref={dialogRef}
+            onCancel={closeForm}
             aria-labelledby="form-title"
             className="modal"
           >
@@ -200,7 +208,7 @@ export function Board({
               <button
                 aria-label="Close enquiry form"
                 className="icon-button"
-                onClick={() => setAdding(false)}
+                onClick={closeForm}
               >
                 <X />
               </button>
@@ -259,8 +267,7 @@ export function Board({
                 Save enquiry
               </button>
             </form>
-          </section>
-        </div>
+          </dialog>
       )}
     </section>
   );

@@ -1,0 +1,65 @@
+[
+  {
+    "id": "problem",
+    "title": "A workflow can look finished.",
+    "image": "baseline.png",
+    "voice": "A workflow can look finished and still lose an enquiry. Foundry helps a training provider turn that hidden risk into something they can test.",
+    "start": 0,
+    "duration": 8.1,
+    "audioDuration": 7.438688
+  },
+  {
+    "id": "baseline",
+    "title": "Two pass. Three failures surface.",
+    "image": "baseline.png",
+    "voice": "This walkthrough uses a prepared sample, not live model generation. Build the enquiry workflow and run five fixed scenarios. The baseline passes two. Three everyday problems are exposed.",
+    "start": 8.1,
+    "duration": 12.067,
+    "audioDuration": 11.410813
+  },
+  {
+    "id": "failure",
+    "title": "Expected versus observed.",
+    "image": "failure.png",
+    "voice": "Open the duplicate test. The contract expects one record and a review warning. The baseline accepts two records. This evidence comes from the same engine that powers the form.",
+    "start": 20.167,
+    "duration": 10.733,
+    "audioDuration": 10.07075
+  },
+  {
+    "id": "repair",
+    "title": "Review a bounded repair.",
+    "image": "repair.png",
+    "voice": "Foundry proposes bounded rule changes. A person reviews the changes before applying them. The repair cannot rewrite the tests or regress an already passing scenario.",
+    "start": 30.9,
+    "duration": 10.367,
+    "audioDuration": 9.684188
+  },
+  {
+    "id": "proof",
+    "title": "Same contract. Five pass.",
+    "image": "improved.png",
+    "voice": "Apply the repair and rerun. All five scenarios now pass. The unassigned enquiry is visible again. The evidence compares versions using the same expectations.",
+    "start": 41.267,
+    "duration": 10.433,
+    "audioDuration": 9.772292
+  },
+  {
+    "id": "validation",
+    "title": "The form follows the rules.",
+    "image": "validation.png",
+    "voice": "These are working controls. An enquiry with a missing email cannot be saved. Duplicate review and date validation also apply to the form. Results can be exported as JSON.",
+    "start": 51.7,
+    "duration": 10.967,
+    "audioDuration": 10.296292
+  },
+  {
+    "id": "scope",
+    "title": "Working proof. Visible limits.",
+    "image": "improved.png",
+    "voice": "This is a constrained training enquiry prototype with synthetic data. The Nebius adapter targets NVIDIA Nemotron. Live inference awaits account activation. Foundry makes the difference between a proposal and proof visible.",
+    "start": 62.667,
+    "duration": 13.3,
+    "audioDuration": 12.629583
+  }
+]

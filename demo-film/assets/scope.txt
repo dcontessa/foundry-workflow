@@ -1,0 +1,1 @@
+This is a constrained training enquiry prototype with synthetic data. The Nebius adapter targets NVIDIA Nemotron. Live inference awaits account activation. Foundry makes the difference between a proposal and proof visible.

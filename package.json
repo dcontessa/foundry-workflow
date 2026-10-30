@@ -8,7 +8,7 @@
     "server": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts",
     "build": "tsc && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test src/engine.test.ts",
+    "test": "node --experimental-strip-types --test src/engine.test.ts server/server.test.ts",
     "start": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts"
   },
   "keywords": [],

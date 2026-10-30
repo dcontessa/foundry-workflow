@@ -1,0 +1,1 @@
+This walkthrough uses a prepared sample, not live model generation. Build the enquiry workflow and run five fixed scenarios. The baseline passes two. Three everyday problems are exposed.

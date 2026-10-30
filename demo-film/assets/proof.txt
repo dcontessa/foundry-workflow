@@ -1,0 +1,1 @@
+Apply the repair and rerun. All five scenarios now pass. The unassigned enquiry is visible again. The evidence compares versions using the same expectations.
