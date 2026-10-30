@@ -7,3 +7,6 @@ dist/
 .DS_Store
 docs/private/
 docs/devpost-draft.png
+demo-film/.hyperframes/
+demo-film/output/
+demo-film/out.mp4

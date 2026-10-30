@@ -1,17 +1,328 @@
-import {useState,useEffect} from 'react';import {ArrowUpRight,RotateCcw,Check,AlertCircle} from 'lucide-react';
-import {baseline,complete,seed,runSuite,sampleProposal,ruleKeys,ruleLabels,proposalSchema,passesRegression,type Rules,type Proposal,type Enquiry} from './engine';import {Board} from './Board';import {Evidence,type Run} from './Evidence';
-const defaultBrief='My training enquiries arrive through messages, email, and spreadsheets. I lose follow-ups and sometimes contact the same person twice. I need one place to assign owners and track each enquiry.';
-type Saved={rules:Rules;records:Enquiry[];runs:Run[];proposal:Proposal|null;version:number;brief:string};
-function load():Saved{try{const s=JSON.parse(localStorage.getItem('foundry-v1')||'null');if(s&&proposalSchema.shape.rules.safeParse(s.rules).success&&Array.isArray(s.records)&&Array.isArray(s.runs)&&Number.isInteger(s.version)&&typeof s.brief==='string')return s;}catch{}return {rules:{...baseline},records:structuredClone(seed),runs:[],proposal:null,version:0,brief:defaultBrief};}
-export function App(){const [saved,setSaved]=useState(load),[busy,setBusy]=useState(false),[error,setError]=useState(''),[pending,setPending]=useState<Proposal|null>(null),[mode,setMode]=useState('sample'),[provider,setProvider]=useState(false),[source,setSource]=useState('Prepared sample'),[usage,setUsage]=useState('');
- const {rules,records,runs,proposal,version,brief}=saved;
- useEffect(()=>{try{localStorage.setItem('foundry-v1',JSON.stringify(saved));}catch{setError('Browser storage is unavailable. Export your evidence before leaving.');}},[saved]);
- useEffect(()=>{fetch('/api/health').then(r=>r.json()).then(d=>setProvider(d.configured===true)).catch(()=>{});},[]);
- async function request(action:'build'|'repair'){setError('');setBusy(true);try{let p:Proposal;if(mode==='sample'){p=action==='build'?sampleProposal():{...sampleProposal(),title:'Repaired enquiry workflow',summary:'Enable duplicate review, chronological dates, and a visible unassigned queue.',rules:{...complete}};setSource('Prepared sample');setUsage('No model call · sample configuration');}else{const r=await fetch('/api/propose',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,brief,rules,failures:runs.at(-1)?.results.filter(t=>!t.pass)??[]})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Inference request failed.');p=proposalSchema.parse(data.proposal);setSource(`Nebius · ${data.model}`);setUsage(`${data.durationMs} ms${data.usage?.total_tokens?` · ${data.usage.total_tokens} tokens`:''}`);}
- if(action==='build'){setSaved(s=>({...s,proposal:p,rules:p.rules,version:s.version+1,runs:[]}));setPending(null);}else setPending(p);
- }catch(e){setError(e instanceof Error?e.message:'Unable to create a proposal.');}finally{setBusy(false);}}
- function run(){const r:Run={version,rules:{...rules},results:runSuite(rules),timestamp:new Date().toISOString()};setSaved(s=>({...s,runs:[...s.runs,r]}));}
- function apply(){if(!pending)return;const next=runSuite(pending.rules);if(!passesRegression(runs.at(-1)?.results??[],next)){setError('Repair rejected: it regresses a previously passing test.');return;}const nextVersion=version+1;setSaved(s=>({...s,rules:pending.rules,proposal:pending,version:nextVersion,runs:[...s.runs,{version:nextVersion,rules:{...pending.rules},results:next,timestamp:new Date().toISOString()}]}));setPending(null);}
- function reset(){setSaved({rules:{...baseline},records:structuredClone(seed),runs:[],proposal:null,version:0,brief:defaultBrief});setPending(null);setError('');setSource('Prepared sample');setUsage('');}
- return <><header><a className="wordmark" href="#">Foundry<span className="brand-dot">.</span></a><nav aria-label="Workflow steps"><a href="#describe">Describe</a><a href="#workbench" className="active">Workbench</a><a href="#prove">Prove</a></nav><select aria-label="Inference mode" value={mode} onChange={e=>{setMode(e.target.value);setPending(null);}}><option value="sample">Sample mode</option><option value="live" disabled={!provider}>Nebius live{!provider?' · not connected':''}</option></select></header><main><div className="intro"><h1>Make it work.<br className="mobile-break"/> Then prove it.</h1><p>Turn a messy process into a workflow you can test.</p></div><div className="workbench"><section className="brief" id="describe"><h2>1. Problem brief</h2><p>Describe the process, the people involved, and what good looks like.</p><label className="sr-only" htmlFor="brief">Problem brief</label><textarea id="brief" value={brief} maxLength={4000} onChange={e=>setSaved(s=>({...s,brief:e.target.value}))}/><button className="primary full" disabled={busy||brief.trim().length<20} onClick={()=>request('build')}>{busy?'Building…':'Build workflow'}<ArrowUpRight size={18}/></button><p className="mode-note">{mode==='sample'?'Prepared training-enquiry example. No live model call.':'Your brief is sent to Nebius for a structured proposal.'}</p><div className="rules"><h3>{pending?'Proposed repair':'Rules and constraints'}</h3><p>{pending?pending.summary:'Guardrails for this workflow.'}</p>{ruleKeys.map(k=><div className="rule" key={k}><span className={(pending?.rules[k]??rules[k])?'checked':'unchecked'}>{(pending?.rules[k]??rules[k])&&<Check size={14}/>}</span><span>{ruleLabels[k]}</span>{pending&&rules[k]!==pending.rules[k]&&<small>change</small>}</div>)}</div>{proposal&&<div className="assumptions"><h3>Working assumptions</h3><ul>{proposal.assumptions.map(a=><li key={a}>{a}</li>)}</ul></div>}<button className="text-button reset" onClick={reset}><RotateCcw size={14}/>Reset synthetic demo</button></section><Board records={records} rules={rules} setRecords={records=>setSaved(s=>({...s,records}))}/><Evidence runs={runs} onRun={run} onRepair={()=>request('repair')} busy={busy} hasWorkflow={version>0} proposalReady={!!pending} onApply={apply}/></div>{error&&<div role="alert" className="error"><AlertCircle size={18}/>{error}</div>}<footer><span>{version?`Workflow v${version}`:'Build a workflow to begin'} · {source}</span><span>{usage||'Synthetic data · stored in this browser'}</span></footer><section className="how"><h2>A working prototype is only the beginning.</h2><p>Foundry tests the rules that power the board, then checks every proposed repair against the same contract. Evidence is executable, inspectable, and yours to export.</p><span>Current scope: training enquiries. No messages are sent.</span></section></main></>;
+import { useState, useEffect } from "react";
+import { ArrowUpRight, RotateCcw, Check, AlertCircle } from "lucide-react";
+import {
+  baseline,
+  complete,
+  seed,
+  runSuite,
+  sampleProposal,
+  ruleKeys,
+  ruleLabels,
+  proposalSchema,
+  passesRegression,
+  type Rules,
+  type Proposal,
+  type Enquiry,
+} from "./engine";
+import { Board } from "./Board";
+import { Evidence, type Run } from "./Evidence";
+const defaultBrief =
+  "My training enquiries arrive through messages, email, and spreadsheets. I lose follow-ups and sometimes contact the same person twice. I need one place to assign owners and track each enquiry.";
+type Saved = {
+  rules: Rules;
+  records: Enquiry[];
+  runs: Run[];
+  proposal: Proposal | null;
+  version: number;
+  brief: string;
+  source: string;
+  usage: string;
+};
+function load(): Saved {
+  try {
+    const s = JSON.parse(localStorage.getItem("foundry-v1") || "null");
+    if (
+      s &&
+      proposalSchema.shape.rules.safeParse(s.rules).success &&
+      Array.isArray(s.records) &&
+      Array.isArray(s.runs) &&
+      Number.isInteger(s.version) &&
+      typeof s.brief === "string"
+    )
+      return { ...s, source: s.source ?? 'Prepared sample', usage: s.usage ?? '' };
+  } catch {}
+  return {
+    rules: { ...baseline },
+    records: structuredClone(seed),
+    runs: [],
+    proposal: null,
+    version: 0,
+    brief: defaultBrief,
+    source: 'Prepared sample',
+    usage: '',
+  };
+}
+export function App() {
+  const [saved, setSaved] = useState(load),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState(""),
+    [pending, setPending] = useState<Proposal | null>(null),
+    [pendingOrigin, setPendingOrigin] = useState({source:'Prepared sample',usage:''}),
+    [mode, setMode] = useState("sample"),
+    [provider, setProvider] = useState(false);
+  const { rules, records, runs, proposal, version, brief, source, usage } = saved;
+  useEffect(() => {
+    try {
+      localStorage.setItem("foundry-v1", JSON.stringify(saved));
+    } catch {
+      setError(
+        "Browser storage is unavailable. Export your evidence before leaving.",
+      );
+    }
+  }, [saved]);
+  useEffect(() => {
+    if (location.hostname.endsWith('github.io')) return;
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => setProvider(d.configured === true))
+      .catch(() => {});
+  }, []);
+  async function request(action: "build" | "repair") {
+    setError("");
+    setBusy(true);
+    try {
+      let p: Proposal;
+      let nextSource='Prepared sample',nextUsage='No model call · sample configuration';
+      if (mode === "sample") {
+        p =
+          action === "build"
+            ? sampleProposal()
+            : {
+                ...sampleProposal(),
+                title: "Repaired enquiry workflow",
+                summary:
+                  "Enable duplicate review, chronological dates, and a visible unassigned queue.",
+                rules: { ...complete },
+              };
+      } else {
+        const r = await fetch("/api/propose", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            brief,
+            rules,
+            failures: runs.at(-1)?.results.filter((t) => !t.pass) ?? [],
+          }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "Inference request failed.");
+        p = proposalSchema.parse(data.proposal);
+        nextSource=`Nebius · ${data.model}`;
+        nextUsage=`${data.durationMs} ms${data.usage?.total_tokens ? ` · ${data.usage.total_tokens} tokens` : ""}`;
+      }
+      if (action === "build") {
+        setSaved((s) => ({
+          ...s,
+          proposal: p,
+          rules: p.rules,
+          version: s.version + 1,
+          runs: [],
+          source: nextSource,
+          usage: nextUsage,
+        }));
+        setPending(null);
+      } else {setPending(p);setPendingOrigin({source:nextSource,usage:nextUsage});}
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to create a proposal.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  function run() {
+    const r: Run = {
+      version,
+      rules: { ...rules },
+      results: runSuite(rules),
+      timestamp: new Date().toISOString(),
+      source,
+      usage,
+    };
+    setSaved((s) => ({ ...s, runs: [...s.runs, r] }));
+  }
+  function apply() {
+    if (!pending) return;
+    const next = runSuite(pending.rules);
+    if (!passesRegression(runs.at(-1)?.results ?? [], next)) {
+      setError("Repair rejected: it regresses a previously passing test.");
+      return;
+    }
+    const nextVersion = version + 1;
+    setSaved((s) => ({
+      ...s,
+      rules: pending.rules,
+      proposal: pending,
+      version: nextVersion,
+      source: pendingOrigin.source,
+      usage: pendingOrigin.usage,
+      runs: [
+        ...s.runs,
+        {
+          version: nextVersion,
+          rules: { ...pending.rules },
+          results: next,
+          timestamp: new Date().toISOString(),
+          source: pendingOrigin.source,
+          usage: pendingOrigin.usage,
+        },
+      ],
+    }));
+    setPending(null);
+  }
+  function reset() {
+    setSaved({
+      rules: { ...baseline },
+      records: structuredClone(seed),
+      runs: [],
+      proposal: null,
+      version: 0,
+      brief: defaultBrief,
+      source: 'Prepared sample',
+      usage: '',
+    });
+    setPending(null);
+    setError("");
+  }
+  return (
+    <>
+      <header>
+        <a className="wordmark" href="#">
+          Foundry<span className="brand-dot">.</span>
+        </a>
+        <nav aria-label="Workflow steps">
+          <a href="#describe">Describe</a>
+          <a href="#workbench" className="active">
+            Workbench
+          </a>
+          <a href="#prove">Prove</a>
+        </nav>
+        <select
+          aria-label="Inference mode"
+          value={mode}
+          onChange={(e) => {
+            setMode(e.target.value);
+            setPending(null);
+          }}
+        >
+          <option value="sample">Sample mode</option>
+          <option value="live" disabled={!provider}>
+            Nebius live{!provider ? " · not connected" : ""}
+          </option>
+        </select>
+      </header>
+      <main>
+        <div className="intro">
+          <h1>
+            Make it work.
+            <br className="mobile-break" /> Then prove it.
+          </h1>
+          <p>Turn a messy process into a workflow you can test.</p>
+        </div>
+        <div className="workbench">
+          <section className="brief" id="describe">
+            <h2>1. Problem brief</h2>
+            <p>
+              Describe the process, the people involved, and what good looks
+              like.
+            </p>
+            <label className="sr-only" htmlFor="brief">
+              Problem brief
+            </label>
+            <textarea
+              id="brief"
+              value={brief}
+              maxLength={4000}
+              onChange={(e) =>
+                setSaved((s) => ({ ...s, brief: e.target.value }))
+              }
+            />
+            <button
+              className="primary full"
+              disabled={busy || brief.trim().length < 20}
+              onClick={() => request("build")}
+            >
+              {busy ? "Building…" : "Build workflow"}
+              <ArrowUpRight size={18} />
+            </button>
+            <p className="mode-note">
+              {mode === "sample"
+                ? "Prepared training-enquiry example. No live model call."
+                : "Your brief is sent to Nebius for a structured proposal."}
+            </p>
+            <div className="rules">
+              <h3>{pending ? "Proposed repair" : "Rules and constraints"}</h3>
+              <p>
+                {pending ? pending.summary : "Guardrails for this workflow."}
+              </p>
+              {ruleKeys.map((k) => (
+                <div className="rule" key={k}>
+                  <span
+                    className={
+                      (pending?.rules[k] ?? rules[k]) ? "checked" : "unchecked"
+                    }
+                  >
+                    {(pending?.rules[k] ?? rules[k]) && <Check size={14} />}
+                  </span>
+                  <span>{ruleLabels[k]}</span>
+                  {pending && rules[k] !== pending.rules[k] && (
+                    <small>change</small>
+                  )}
+                </div>
+              ))}
+            </div>
+            {proposal && (
+              <div className="assumptions">
+                <h3>Working assumptions</h3>
+                <ul>
+                  {proposal.assumptions.map((a) => (
+                    <li key={a}>{a}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <button className="text-button reset" onClick={reset}>
+              <RotateCcw size={14} />
+              Reset synthetic demo
+            </button>
+          </section>
+          <Board
+            records={records}
+            rules={rules}
+            setRecords={(records) => setSaved((s) => ({ ...s, records }))}
+          />
+          <Evidence
+            runs={runs}
+            onRun={run}
+            onRepair={() => request("repair")}
+            busy={busy}
+            hasWorkflow={version > 0}
+            proposalReady={!!pending}
+            onApply={apply}
+          />
+        </div>
+        {error && (
+          <div role="alert" className="error">
+            <AlertCircle size={18} />
+            {error}
+          </div>
+        )}
+        <footer>
+          <span>
+            {version ? `Workflow v${version}` : "Build a workflow to begin"} ·{" "}
+            {source}
+          </span>
+          <span>{usage || "Synthetic data · stored in this browser"}</span>
+        </footer>
+        <section className="how">
+          <h2>A working prototype is only the beginning.</h2>
+          <p>
+            Foundry tests the rules that power the board, then checks every
+            proposed repair against the same contract. Evidence is executable,
+            inspectable, and yours to export.
+          </p>
+          <span>Current scope: training enquiries. No messages are sent.</span>
+        </section>
+      </main>
+    </>
+  );
 }
