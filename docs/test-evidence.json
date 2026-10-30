@@ -1,0 +1,89 @@
+{
+  "contractVersion": 1,
+  "mode": "prepared-sample",
+  "data": "synthetic",
+  "baseline": [
+    {
+      "id": "valid",
+      "name": "Valid enquiry is recorded",
+      "pass": true,
+      "expected": "One record with a stable ID and new status.",
+      "actual": "1 record; status new; ID created.",
+      "durationMs": 1.686
+    },
+    {
+      "id": "duplicate",
+      "name": "Duplicate is flagged",
+      "pass": false,
+      "expected": "Duplicate blocked for review; record count stays 1.",
+      "actual": "2 records created. Duplicate was accepted.",
+      "durationMs": 0.05
+    },
+    {
+      "id": "email",
+      "name": "Missing email is blocked",
+      "pass": true,
+      "expected": "Save blocked with a contact-email message.",
+      "actual": "Enter a valid contact email.",
+      "durationMs": 0.009
+    },
+    {
+      "id": "date",
+      "name": "Invalid follow-up is blocked",
+      "pass": false,
+      "expected": "Follow-up before received date is rejected.",
+      "actual": "Enquiry created.",
+      "durationMs": 0.009
+    },
+    {
+      "id": "unassigned",
+      "name": "Unassigned enquiry stays visible",
+      "pass": false,
+      "expected": "Unassigned record remains in the visible queue.",
+      "actual": "1 saved; 0 visible in the queue.",
+      "durationMs": 0.019
+    }
+  ],
+  "improved": [
+    {
+      "id": "valid",
+      "name": "Valid enquiry is recorded",
+      "pass": true,
+      "expected": "One record with a stable ID and new status.",
+      "actual": "1 record; status new; ID created.",
+      "durationMs": 0.982
+    },
+    {
+      "id": "duplicate",
+      "name": "Duplicate is flagged",
+      "pass": true,
+      "expected": "Duplicate blocked for review; record count stays 1.",
+      "actual": "Possible duplicate: this email and course already exist. Review the existing enquiry.",
+      "durationMs": 0.033
+    },
+    {
+      "id": "email",
+      "name": "Missing email is blocked",
+      "pass": true,
+      "expected": "Save blocked with a contact-email message.",
+      "actual": "Enter a valid contact email.",
+      "durationMs": 0.007
+    },
+    {
+      "id": "date",
+      "name": "Invalid follow-up is blocked",
+      "pass": true,
+      "expected": "Follow-up before received date is rejected.",
+      "actual": "Follow-up must be a valid date on or after the received date.",
+      "durationMs": 0.009
+    },
+    {
+      "id": "unassigned",
+      "name": "Unassigned enquiry stays visible",
+      "pass": true,
+      "expected": "Unassigned record remains in the visible queue.",
+      "actual": "1 saved; 1 visible in the queue.",
+      "durationMs": 0.012
+    }
+  ]
+}

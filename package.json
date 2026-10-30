@@ -1,0 +1,34 @@
+{
+  "name": "foundry",
+  "version": "1.0.0",
+  "description": "Working workflows with executable evidence",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "server": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test src/engine.test.ts",
+    "start": "node --env-file-if-exists=.env --experimental-strip-types server/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "lucide-react": "^1.65.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

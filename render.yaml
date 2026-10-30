@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: foundry-workflow
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: HOST
+        value: 0.0.0.0
+      - key: NEBIUS_API_KEY
+        sync: false
+      - key: NEBIUS_MODEL
+        sync: false
