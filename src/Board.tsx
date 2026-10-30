@@ -29,6 +29,7 @@ export function Board({
     }),
     [message, setMessage] = useState("");
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const owners = [...new Set(["Alex", "Taylor", "Morgan", ...records.map((r) => r.owner).filter(Boolean)])];
   useEffect(() => {
     if (adding) dialogRef.current?.showModal();
   }, [adding]);
@@ -131,7 +132,7 @@ export function Board({
                     }
                   >
                     <option value="">Unassigned</option>
-                    {["Alex", "Taylor", "Morgan"].map((x) => (
+                    {owners.map((x) => (
                       <option key={x}>{x}</option>
                     ))}
                   </select>

@@ -29,3 +29,5 @@ Intentional deviations: actual engine rules and scenarios, real pass-count compa
 ## Limits
 
 Live NVIDIA-on-Nebius inference remains blocked by account activation and authorized API-key access. A configured health endpoint is not proof that inference works. The public GitHub Pages preview is sample-only and cannot execute the server-side adapter. Public backend deployment and final sponsor-compliant video remain outstanding. No production multi-user, accessibility conformance, load, penetration, or exhaustive browser claims are made.
+
+Custom owner regression checked: editing a synthetic enquiry to owner Casey shows Casey selected in the board dropdown and includes that owner among available options. Production build and all 14 automated checks pass after the fix.
